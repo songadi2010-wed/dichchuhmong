@@ -1,0 +1,305 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HMONG TRANSLATE</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #101827;
+    color: white;
+    padding: 20px;
+}
+
+.container {
+    max-width: 500px;
+    margin: 35px auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    color: #38bdf8;
+    letter-spacing: 2px;
+}
+
+.header p {
+    color: #94a3b8;
+}
+
+.card {
+    background: #1e293b;
+    padding: 20px;
+    border-radius: 18px;
+    margin-bottom: 18px;
+}
+
+.languages {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+select {
+    background: #334155;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    width: 42%;
+}
+
+.swap {
+    background: #0284c7;
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+textarea {
+    width: 100%;
+    height: 125px;
+    background: #0f172a;
+    border: 1px solid #475569;
+    color: white;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 16px;
+    resize: vertical;
+    outline: none;
+}
+
+textarea:focus {
+    border-color: #38bdf8;
+}
+
+button {
+    cursor: pointer;
+}
+
+.translate {
+    width: 100%;
+    padding: 15px;
+    background: #0284c7;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: bold;
+    margin-top: 15px;
+}
+
+.translate:hover {
+    background: #0369a1;
+}
+
+.result {
+    min-height: 100px;
+    background: #0f172a;
+    padding: 15px;
+    border-radius: 12px;
+    font-size: 17px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.actions button {
+    flex: 1;
+    padding: 12px;
+    background: #334155;
+    color: white;
+    border: none;
+    border-radius: 10px;
+}
+
+.note {
+    color: #94a3b8;
+    font-size: 12px;
+    text-align: center;
+    margin-top: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>HMONG TRANSLATE</h1>
+        <p>Ứng dụng dịch tiếng Hmong và tiếng Việt</p>
+    </div>
+
+    <div class="card">
+
+        <div class="languages">
+
+            <select id="from">
+                <option value="vi">Tiếng Việt</option>
+                <option value="hm">Tiếng Hmong</option>
+            </select>
+
+            <button class="swap" onclick="swapLang()">
+                ⇄
+            </button>
+
+            <select id="to">
+                <option value="hm">Tiếng Hmong</option>
+                <option value="vi">Tiếng Việt</option>
+            </select>
+
+        </div>
+
+        <textarea id="input"
+        placeholder="Nhập nội dung cần dịch..."></textarea>
+
+        <button class="translate" onclick="translateText()">
+            DỊCH NGAY
+        </button>
+
+    </div>
+
+    <div class="card">
+
+        <h3>Kết quả dịch</h3>
+
+        <div class="result" id="result">
+            Bản dịch sẽ xuất hiện ở đây...
+        </div>
+
+        <div class="actions">
+            <button onclick="copyResult()">Sao chép</button>
+            <button onclick="clearAll()">Xóa</button>
+        </div>
+
+    </div>
+
+    <p class="note">
+        HMONG TRANSLATE © 2026
+    </p>
+
+</div>
+
+<script>
+
+// TỪ ĐIỂN MẪU
+// Hãy bổ sung thêm từ vựng đã được kiểm chứng.
+
+const dictionary = {
+
+    "xin chào": "Nyob zoo",
+    "cảm ơn": "Ua tsaug",
+    "tạm biệt": "Sib ntsib dua",
+    "bạn": "Koj",
+    "tôi": "Kuv",
+    "mẹ": "Niam",
+    "bố": "Txiv",
+    "nhà": "Tsev",
+    "nước": "Dej",
+    "ăn": "Noj",
+    "uống": "Haus",
+    "đẹp": "Zoo nkauj",
+    "yêu": "Hlub",
+    "không": "Tsis",
+    "có": "Muaj",
+
+};
+
+// TẠO TỪ ĐIỂN NGƯỢC
+const reverseDictionary = {};
+
+for (const [vi, hm] of Object.entries(dictionary)) {
+    reverseDictionary[hm.toLowerCase()] = vi;
+}
+
+// DỊCH VĂN BẢN
+function translateText() {
+
+    const input = document.getElementById("input").value.trim();
+    const from = document.getElementById("from").value;
+    const to = document.getElementById("to").value;
+
+    const result = document.getElementById("result");
+
+    if (!input) {
+        result.innerText = "Vui lòng nhập nội dung!";
+        return;
+    }
+
+    if (from === to) {
+        result.innerText = input;
+        return;
+    }
+
+    const dict = from === "vi"
+        ? dictionary
+        : reverseDictionary;
+
+    const translated = dict[input.toLowerCase()];
+
+    if (translated) {
+        result.innerText = translated;
+    } else {
+        result.innerText =
+            "Chưa có dữ liệu từ vựng này. Vui lòng bổ sung vào từ điển.";
+    }
+}
+
+// ĐỔI NGÔN NGỮ
+function swapLang() {
+
+    const from = document.getElementById("from");
+    const to = document.getElementById("to");
+
+    const temp = from.value;
+
+    from.value = to.value;
+    to.value = temp;
+
+    translateText();
+}
+
+// SAO CHÉP
+function copyResult() {
+
+    const text = document.getElementById("result").innerText;
+
+    navigator.clipboard.writeText(text)
+        .then(() => alert("Đã sao chép kết quả!"))
+        .catch(() => alert("Không thể sao chép!"));
+}
+
+// XÓA
+function clearAll() {
+
+    document.getElementById("input").value = "";
+    document.getElementById("result").innerText =
+        "Bản dịch sẽ xuất hiện ở đây...";
+
+}
+
+</script>
+
+</body>
+</html>
